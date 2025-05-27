@@ -16,16 +16,56 @@ def open_easy_level():
     easy_window = tk.Toplevel(root)
     easy_window.title("Easy Level")
     easy_window.geometry("900x600")
+    easy_window.resizable(False, False)
+
+    canvas = tk.Canvas(easy_window, width=400, height=500, highlightthickness=0)
+    canvas.pack(fill="both", expand=True)
+
+    # Set background image
+    bg_image = Image.open("painting_bg.png").resize((900,600 ))
+    bg_photo = ImageTk.PhotoImage(bg_image)
+    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+
+    easy_window.bg_photo = bg_photo
+    
+    #close_button = tk.Button(easy_window, text="Quit", command=easy_window.destroy)
+    #close_button.pack()
 
 def open_medium_level():
     medium_window = tk.Toplevel(root)
     medium_window.title("Medium Level")
     medium_window.geometry("900x600")
 
+    #canvas = tk.Canvas(medium_window, width=400, height=500, highlightthickness=0)
+    #canvas.pack(fill="both", expand=True)
+
+    # Set background image
+    bg_image = Image.open("painting_bg.png").resize((900,600 ))
+    bg_photo = ImageTk.PhotoImage(bg_image)
+    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+
+    medium_window.bg_photo = bg_photo
+
+    #close_button = tk.Button(medium_window, text="Quit", command=medium_window.destroy)
+    #close_button.pack()
+
 def open_hard_level():
     hard_window = tk.Toplevel(root)
     hard_window.title("Hard Level")
     hard_window.geometry("900x600")
+
+    canvas = tk.Canvas(hard_window, width=400, height=500, highlightthickness=0)
+    canvas.pack(fill="both", expand=True)
+
+    # Set background image
+    bg_image = Image.open("painting_bg.png").resize((900,600 ))
+    bg_photo = ImageTk.PhotoImage(bg_image)
+    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+
+    hard_window.bg_photo = bg_photo
+
+    #close_button = tk.Button(hard_window, text="Quit", command=hard_window.destroy)
+    #close_button.pack()
 
 
 canvas = tk.Canvas(root, width=400, height=500, highlightthickness=0)
@@ -52,3 +92,5 @@ button = tk.Button(root, bg= "#d1f3fc", text="Hard", width=8, height=1, font=("G
 button.place(x=150, y=340)
 
 root.mainloop()
+
+
