@@ -1,0 +1,54 @@
+#1.00.py (Version 1)
+#Date:23/05/25
+#Purpose: To create a simple maths game targeted at Lynfield College students
+#Author: Naomi Ching
+
+import tkinter as tk
+from tkinter import messagebox
+from PIL import Image, ImageTk
+
+root = tk.Tk()
+root.title("OH Clam!")
+root.geometry("400x500")
+root.resizable(False, False)
+
+def open_easy_level():
+    easy_window = tk.Toplevel(root)
+    easy_window.title("Easy Level")
+    easy_window.geometry("900x600")
+
+def open_medium_level():
+    medium_window = tk.Toplevel(root)
+    medium_window.title("Medium Level")
+    medium_window.geometry("900x600")
+
+def open_hard_level():
+    hard_window = tk.Toplevel(root)
+    hard_window.title("Hard Level")
+    hard_window.geometry("900x600")
+
+
+canvas = tk.Canvas(root, width=400, height=500, highlightthickness=0)
+canvas.place(x=0, y=0)
+
+# Set background image
+bg_image = Image.open("bg_clams.png").resize((400, 650))
+bg_photo = ImageTk.PhotoImage(bg_image)
+canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+
+#Create all the labels for main menu
+canvas.create_text(200, 80, text="OH! CLAM", font=("Georgia", 40, "bold"), fill="#3f6f7d")
+canvas.create_text(200, 160, text ="Username", font=("Segoe Print", 15, "bold"), fill="#24424c")
+canvas.create_text(200, 240, text = "Difficulty", font=("Segoe Print", 15, "bold"), fill="#24424c")
+
+entry = tk.Entry(root, width=15, font=("", 14))
+entry.place(x=120, y=180)
+    
+button = tk.Button(root, bg= "#d1f3fc", text="Easy", width=8, height=1, font=("Georgia", 14), command=open_easy_level)
+button.place(x=150, y=260)
+button = tk.Button(root, bg= "#d1f3fc", text="Medium", width=8, height=1, font=("Georgia", 14), command=open_medium_level)
+button.place(x=150, y=300)
+button = tk.Button(root, bg= "#d1f3fc", text="Hard", width=8, height=1, font=("Georgia", 14), command=open_hard_level)
+button.place(x=150, y=340)
+
+root.mainloop()
