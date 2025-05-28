@@ -12,6 +12,40 @@ root.title("OH Clam!")
 root.geometry("400x500")
 root.resizable(False, False)
 
+
+def quit_app():
+    if messagebox.askokcancel("Quit", "Do you really want to quit?"):
+        root.destroy()
+    
+
+def open_info():
+    open_info = tk.Toplevel(root)
+    open_info.title("About the Game")
+    open_info.geometry("500x130")
+    open_info.resizable(False, False)
+    message=(
+        "OH!Clam is a fun maths game that focuses on substitution problems.\n"
+        "There are three difficulties to choose from: Easy, Medium and Hard.\n"
+        "You have 2 minutes before you'll miss out on the clam.\n"
+        "Have fun!"
+    ) 
+
+    info_label=tk.Label(open_info, text=message, font=("Segoe UI", 11), justify="left")
+    info_label.place(x=10, y=10)
+
+def open_scoreboard():
+    scoreboard_window = tk.Toplevel(root)
+    scoreboard_window.title("Leaderboard")
+    scoreboard_window.geometry("500x300")
+    scoreboard_window.resizable(False, False)
+
+    canvas = tk.Canvas(scoreboard_window, width=400, height=500, highlightthickness=0)
+    canvas.pack(fill="both", expand=True)
+    
+    canvas.create_text(130, 30, text = "Username", font=("Segoe Print", 15, "bold"), fill="#24424c")
+    canvas.create_text(350, 30, text = "Scoreboard", font=("Segoe Print", 15, "bold"), fill="#24424c")
+    
+
 def open_easy_level():
     easy_window = tk.Toplevel(root)
     easy_window.title("Easy Level")
@@ -20,13 +54,19 @@ def open_easy_level():
 
     canvas = tk.Canvas(easy_window, width=400, height=500, highlightthickness=0)
     canvas.pack(fill="both", expand=True)
-
-    # Set background image
+    
     bg_image = Image.open("painting_bg.png").resize((900,600 ))
     bg_photo = ImageTk.PhotoImage(bg_image)
     canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-
     easy_window.bg_photo = bg_photo
+
+    clam_gif = Image.open("clam_GIF.gif").resize((400,400))
+    clam_gif = ImageTk.PhotoImage(clam_gif)
+    canvas.create_image(800, 500, image=clam_gif, anchor="center")
+    easy_window.clam_photo = clam_gif
+
+    quit_button = tk.Button(easy_window, bg= "#d1f3fc", text="Quit", font=("Georgia", 12), command=easy_window.destroy)
+    quit_button.place(x=820, y=20)
     
     #close_button = tk.Button(easy_window, text="Quit", command=easy_window.destroy)
     #close_button.pack()
@@ -36,8 +76,8 @@ def open_medium_level():
     medium_window.title("Medium Level")
     medium_window.geometry("900x600")
 
-    #canvas = tk.Canvas(medium_window, width=400, height=500, highlightthickness=0)
-    #canvas.pack(fill="both", expand=True)
+    canvas = tk.Canvas(medium_window, width=400, height=500, highlightthickness=0)
+    canvas.pack(fill="both", expand=True)
 
     # Set background image
     bg_image = Image.open("painting_bg.png").resize((900,600 ))
@@ -58,9 +98,7 @@ def open_hard_level():
     canvas.pack(fill="both", expand=True)
 
     # Set background image
-    bg_image = Image.open("painting_bg.png").resize((900,600 ))
-    bg_photo = ImageTk.PhotoImage(bg_image)
-    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+    
 
     hard_window.bg_photo = bg_photo
 
@@ -83,13 +121,20 @@ canvas.create_text(200, 240, text = "Difficulty", font=("Segoe Print", 15, "bold
 
 entry = tk.Entry(root, width=15, font=("", 14))
 entry.place(x=120, y=180)
-    
+
+#Buttons for the main menu  
 button = tk.Button(root, bg= "#d1f3fc", text="Easy", width=8, height=1, font=("Georgia", 14), command=open_easy_level)
 button.place(x=150, y=260)
 button = tk.Button(root, bg= "#d1f3fc", text="Medium", width=8, height=1, font=("Georgia", 14), command=open_medium_level)
 button.place(x=150, y=300)
 button = tk.Button(root, bg= "#d1f3fc", text="Hard", width=8, height=1, font=("Georgia", 14), command=open_hard_level)
 button.place(x=150, y=340)
+button=tk.Button(root, bg="#d1f3fc", text="Info", width=8, height=1, font=("Georgia", 14), command=open_info)
+button.place(x=20, y=440)
+button=tk.Button(root, bg="#d1f3fc", text="Quit", width=8, height=1, font=("Georgia", 14), command=quit_app)
+button.place(x=280, y=440)
+button=tk.Button(root, bg="#d1f3fc", text="Scoreboard", width=8, height=1, font=("Georgia", 14), command=open_scoreboard)
+button.place(x=150, y=440)
 
 root.mainloop()
 
