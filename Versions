@@ -1,179 +1,304 @@
-#1.00.py (Version 1)
-#Date:23/05/25
-#Purpose: To create a simple maths game targeted at Lynfield College students
-#Author: Naomi Ching
+# OH! Clam Maths Game
+# Version 1.2
+# Updated: 22/07/25
+# Author: Naomi Ching
 
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
 import random
+import time
+import os
+
+
+
+def center_window(win, width, height):
+    screen_width = root.winfo_screenwidth()
+    screen_height =root.winfo_screenheight()
+    
+    x = (screen_width / 2) - (width / 2)
+    y = (screen_height / 2) - (height / 2)
+    win.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
 
 root = tk.Tk()
 root.title("OH Clam!")
-root.geometry("400x500")
+center_window(root, 400, 500)
 root.resizable(False, False)
 
 def quit_app():
     if messagebox.askokcancel("Quit", "Do you really want to quit?"):
-        root.destroy()   
+        root.destroy()
 
 def open_info():
-    open_info = tk.Toplevel(root)
-    open_info.title("About the Game")
-    open_info.geometry("500x130")
-    open_info.resizable(False, False)
-    message=(
-        "OH!Clam is a fun maths game that focuses on substitution problems.\n"
-        "There are three difficulties to choose from: Easy, Medium and Hard.\n"
-        "You have 2 minutes before you'll miss out on the clam.\n"
-        "Have fun!"
-    ) 
+    info_window = tk.Toplevel(root)
+    info_window.title("About the Game")
+    info_window.geometry("500x110+240+290")  
+    info_window.resizable(False, False)
 
-    info_label=tk.Label(open_info, text=message, font=("Segoe UI", 11), justify="left")
-    info_label.place(x=10, y=10)
+    # Create canvas sized to the window
+    canvas = tk.Canvas(info_window, width=500, height=130)
+    canvas.pack(fill="both", expand=True)
+
+    # Load and display the background image
+    bg_image = Image.open("bg_clams.png").resize((550, 500))
+    bg_photo = ImageTk.PhotoImage(bg_image)
+    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+
+    # Save reference to avoid garbage collection
+    info_window.bg_photo = bg_photo
+
+    # Your message text, displayed on canvas
+    message = (
+        "OH!Clam is a fun maths game that focuses on substitution problems."
+        " There are three difficulties to choose from: Easy, Medium and Hard."
+        " Answer 10 questions as fast as you can to reach the clam! Have fun!🦦"
+    )
+    # Create text on the canvas with a font and color that stands out
+    canvas.create_text(
+        10, 10,
+        anchor="nw",
+        text=message,
+        font=("Segoe UI", 13),
+        fill="Black",  
+        width=480  # Wrap text nicely inside the canvas
+    )
+    
+    quit_button = tk.Button(info_window, bg="#d1f3fc", text="Close", font=("Georgia", 9), command=info_window.destroy)
+    quit_button.place(x=430, y=80)
+
+def save_score(username, elapsed_time):
+    with open("scoreboard.txt", "a") as file:
+        file.write(f"{username},{elapsed_time:.1f}\n")
 
 def open_scoreboard():
     scoreboard_window = tk.Toplevel(root)
     scoreboard_window.title("Leaderboard")
-    scoreboard_window.geometry("500x300")
+    scoreboard_window.geometry("500x300+1180+290") 
     scoreboard_window.resizable(False, False)
 
-    canvas = tk.Canvas(scoreboard_window, width=400, height=500, highlightthickness=0)
+    canvas = tk.Canvas(scoreboard_window, width=500, height=300)
     canvas.pack(fill="both", expand=True)
 
-    bg_image = Image.open("bg_clams.png").resize((500,600 ))
-    bg_photo = ImageTk.PhotoImage(bg_image)
-    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-    scoreboard_window.bg_photo = bg_photo
-    
-    canvas.create_text(130, 30, text = "Username", font=("Segoe Print", 15, "bold"), fill="#24424c")
-    canvas.create_text(350, 30, text = "Scoreboard", font=("Segoe Print", 15, "bold"), fill="#24424c")
-    
-    quit_button = tk.Button(scoreboard_window, bg= "#d1f3fc", text="Quit", font=("Georgia", 12), command=scoreboard_window.destroy)
-    quit_button.place(x=435, y=250)
-    
-def open_easy_level():
-    easy_window = tk.Toplevel(root)
-    easy_window.title("Easy Level")
-    easy_window.geometry("900x600")
-    easy_window.resizable(False, False)
+    try:
+        bg_image = Image.open("bg_clams.png").resize((500, 300))
+        bg_photo = ImageTk.PhotoImage(bg_image)
+        canvas.create_image(0, 0, image=bg_photo, anchor="nw")
+        scoreboard_window.bg_photo = bg_photo
+    except:
+        pass
 
-    questions = [
-    ("If x = 2, what is 3x + 1?", "7"),
-    ("If x = 5, what is x²?", "25"),
-    ("If x = 4, what is 2x + 6?", "14"),
-    ("If x = 3, what is x³?", "27"),
-    ("If x = 1, what is 5x - 2?", "3")
-]
-    
-    question, correct_answer = random.choice(questions)  
+    canvas.create_text(130, 30, text="Username", font=("Segoe Print", 17, "bold"), fill="#24424c")
+    canvas.create_text(350, 30, text="Time (s)", font=("Segoe Print", 17, "bold"), fill="#24424c")
 
-    canvas = tk.Canvas(easy_window, width=900, height=600, highlightthickness=0)
-    canvas.pack(fill="both", expand=True)
-    
-    bg_image = Image.open("painting_bg.png").resize((900,600 ))
-    bg_photo = ImageTk.PhotoImage(bg_image)
-    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-    easy_window.bg_photo = bg_photo
+    if os.path.exists("scoreboard.txt"):
+        with open("scoreboard.txt", "r") as file:
+            lines = file.readlines()
+            scores = []
+            for line in lines:
+                try:
+                    name, t = line.strip().split(",")
+                    scores.append((name, float(t)))
+                except:
+                    continue
+            scores.sort(key=lambda x: x[1])
+            for i, (name, t) in enumerate(scores[:10]):
+                canvas.create_text(130, 60 + i * 20, text=name, font=("Arial", 12), fill="#24424c")
+                canvas.create_text(350, 60 + i * 20, text=f"{t:.1f}s", font=("Arial", 12), fill="#24424c")
 
-    #clam_gif = Image.open("").resize((400,400))
-    #clam_gif = ImageTk.PhotoImage(clam_gif)
-    #canvas.create_image(800, 500, image=clam_gif, anchor="center")
-    #easy_window.clam_photo = clam_gif
+    quit_button = tk.Button(scoreboard_window, bg="#d1f3fc", text="Close", font=("Georgia", 12), command=scoreboard_window.destroy)
+    quit_button.place(x=400, y=260)
 
-    question_display = canvas.create_text(350, 150, text=question, font=("Arial", 40))
-    entry = tk.Entry(easy_window, width=5, font=("", 14))
-    entry.place(x=120, y=180)
-    
-    quit_button = tk.Button(easy_window, bg= "#d1f3fc", text="Quit", font=("Georgia", 12), command=easy_window.destroy)
-    quit_button.place(x=820, y=20)
-
-def open_medium_level():
-    medium_window = tk.Toplevel(root)
-    medium_window.title("Medium Level")
-    medium_window.geometry("900x600")
-
-    questions = [
-    ("If a = 0.5, b = 2.2, what is 3b + a?", "7.1"),
-    ("If m = 0.5, p = 0.75 and c = 2.2, what is m + p + c?", "3.45"),
-    ("If P = 9 and W = 14, what is 2P + 5W?", "88"),
-    ("If x = 6 and y = -2, what is y + 20 / x?", "3"),
-    ("If n = 4 and l = 7, what is 5n - l?", "13"),
-    ("If P = 9 and W = 14, what is 2P + 5W?", "88"),
-    ("If v = 4.5 and y = 5.5, what is v x y?", "24.75"),
-    ("If r = 14 and y = 8, what is 4r / y?", "7")
-    
+easy_questions = [
+    ("What is 2x + 3 when x = {x}?", lambda x: 2 * x + 3),
+    ("What is x² - 4 when x = {x}?", lambda x: x ** 2 - 4),
+    ("What is 3x - 7 when x = {x}?", lambda x: 3 * x - 7),
+    ("What is x³ + 2 when x = {x}?", lambda x: x ** 3 + 2),
+    ("What is 4x² - x when x = {x}?", lambda x: 4 * x ** 2 - x),
 ]
 
-    question, correct_answer = random.choice(questions)
-
-    canvas = tk.Canvas(medium_window, width=400, height=500, highlightthickness=0)
-    canvas.pack(fill="both", expand=True)
-
-    bg_image = Image.open("painting_bg.png").resize((900,600 ))
-    bg_photo = ImageTk.PhotoImage(bg_image)
-    canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-    medium_window.bg_photo = bg_photo
-    
-    question_display = canvas.create_text(350, 150, text=question, font=("Arial", 40))
-    entry = tk.Entry(medium_window, width=5, font=("", 14))
-    entry.place(x=120, y=180)
-     
-def open_hard_level():
-    hard_window = tk.Toplevel(root)
-    hard_window.title("Hard Level")
-    hard_window.geometry("900x600")
-
-    questions = [
-    ("If t = 9.3 and p = 3.9, what is 2.8t + 1.8p?", "56")
-    ("Work out the value of x when y = 4, 4w + 3y = 30", "36")
+medium_questions = [
+    ("What is 5x + 2 when x = {x}?", lambda x: 5 * x + 2),
+    ("What is x² + x when x = {x}?", lambda x: x ** 2 + x),
+    ("What is (x + 3) * 2 when x = {x}?", lambda x: (x + 3) * 2),
+    ("What is (3x - 1) when x = {x}?", lambda x: 3 * x - 1),
+    ("What is (x² - 1) when x = {x}?", lambda x: x ** 2 - 1),
 ]
-     
 
-    question, correct_answer = random.choice(questions)
 
-    canvas = tk.Canvas(hard_window, width=400, height=500, highlightthickness=0)
+hard_questions = [
+    ("What is (x³ + 2x² - x + 4) when x = {x}?", lambda x: x**3 + 2*x**2 - x + 4),
+    ("What is ((3x² + 2x - 5) / (x + 1)) when x = {x}?", lambda x: (3*x**2 + 2*x - 5)/(x + 1) if x != -1 else float('inf')),
+    ("What is (2x³ - x² + 3x - 7) when x = {x}?", lambda x: 2*x**3 - x**2 + 3*x - 7),
+    ("What is ((x - 2)(x² + 2x + 4)) when x = {x}?", lambda x: (x - 2)*(x**2 + 2*x + 4)),
+    ("What is ((x + 1)³ - x³) when x = {x}?", lambda x: (x + 1)**3 - x**3),
+]
+
+
+def open_game_level(level_name, question_templates):
+    username = entry.get().strip()
+    if not username:
+        messagebox.showerror("No Username", "Please enter a username to start.")
+        return
+
+    root.withdraw()
+    game_window = tk.Toplevel(root)
+    game_window.title(f"{level_name} Level")
+    center_window(game_window, 900, 600)
+    game_window.resizable(False, False)
+
+    canvas = tk.Canvas(game_window, width=900, height=600)
     canvas.pack(fill="both", expand=True)
 
-    bg_image = Image.open("painting_bg.png").resize((900,600 ))
+    bg_image = Image.open("painting_bg.png").resize((900, 600))
     bg_photo = ImageTk.PhotoImage(bg_image)
     canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-    hard_window.bg_photo = bg_photo
-    
-    question_display = canvas.create_text(350, 150, text=question, font=("Arial", 40))
-    entry = tk.Entry(hard_window, width=5, font=("", 14))
-    entry.place(x=120, y=180)
+    game_window.bg_photo = bg_photo
 
-#Main Menu Setup
+    game_window.otter_swim_img = ImageTk.PhotoImage(Image.open("otter_swimming.png").resize((120, 120)))
+    game_window.clam_img = ImageTk.PhotoImage(Image.open("clam.png").resize((120, 120)))
+    game_window.otter_clam_img = ImageTk.PhotoImage(Image.open("otter_holding_clam.png").resize((200, 250)))
+
+    otter_x = 50
+    otter_y = 450
+    otter_id = canvas.create_image(otter_x, otter_y, image=game_window.otter_swim_img, anchor="nw")
+    clam_id = canvas.create_image(800, otter_y, image=game_window.clam_img, anchor="nw")
+
+    def move_otter():
+        nonlocal otter_x, otter_y
+        otter_x += 75
+        canvas.coords(otter_id, otter_x, otter_y)   
+
+    start_time = time.time()
+    stopwatch_id = canvas.create_text(450, 30, text="Time: 0.0s", font=("Arial", 18), fill="black")
+
+    game_over = [False]
+    correct_count = [0]
+
+    feedback_id = canvas.create_text(450, 550, text="", font=("Arial", 18), fill="green")
+    answer_buttons_frame = tk.Frame(game_window, bg="white")
+    buttons_window = canvas.create_window(450, 350, window=answer_buttons_frame)
+    question_window_id = [None]
+    option_button_ids = []
+
+    def generate_question():
+        template, func = random.choice(question_templates)
+        x = random.randint(1, 5)
+        correct = func(x)
+        correct_rounded = round(correct, 1) if isinstance(correct, float) else correct
+        options = [correct_rounded]
+
+        while len(options) < 4:
+            difference = random.choice([-3, -2, -1, 1, 2, 3])
+            wrong_answer = correct_rounded + difference
+            if wrong_answer not in options:
+                options.append(wrong_answer)
+
+        random.shuffle(options)
+            
+        return {
+            "question": template.format(x=x),
+            "options": [str(round(opt, 1)) for opt in options],
+            "answer": str(correct_rounded)
+        }
+
+    def check_answer(selected, correct):
+        if game_over[0]:
+            return
+        if selected == correct:
+            correct_count[0] += 1
+            canvas.itemconfig(feedback_id, text="Correct!", fill="green")
+            move_otter()
+        else:
+            canvas.itemconfig(feedback_id, text=f"Wrong! Answer was {correct}", fill="red")
+
+        if correct_count[0] >= 10:
+            game_over[0] = True
+            canvas.itemconfig(otter_id, image=game_window.otter_clam_img)
+            canvas.coords(otter_id, 360, 260)
+            canvas.delete(clam_id)
+            for btn_id in option_button_ids:
+                canvas.delete(btn_id)
+            option_button_ids.clear()
+            canvas.delete(buttons_window)
+            answer_buttons_frame.destroy()
+            if question_window_id[0]:
+                canvas.delete(question_window_id[0])
+            elapsed = time.time() - start_time
+
+# Remove old stopwatch and feedback
+            canvas.delete(stopwatch_id)
+            canvas.itemconfig(feedback_id, text="You reached the clam! 🦦🐚", fill="darkgreen")
+
+            # Show large "Final Time" text above otter
+            final_time_text = canvas.create_text(
+                450, 180,  # y-position moved higher to be above otter
+                text=f"Final Time: {elapsed:.1f}s",
+                font=("Arial", 30, "bold"),
+                fill="black"
+            )
+
+            save_score(username, elapsed)
+
+        else:
+            game_window.after(1000, show_question)
+
+    def show_question():
+        if game_over[0]:
+            return
+        if question_window_id[0]:
+            canvas.delete(question_window_id[0])
+            question_window_id[0] = None
+        for btn_id in option_button_ids:
+            canvas.delete(btn_id)
+        option_button_ids.clear()
+        for widget in answer_buttons_frame.winfo_children():
+            widget.destroy()
+
+        q = generate_question()
+        question_window_id[0] = canvas.create_text(450, 150, text=q["question"], font=("Arial", 24), fill="black")
+
+        positions = [(350, 300), (500, 300), (350, 360), (500, 360)]
+        for index, choice in enumerate(q["options"]):
+            x, y = positions[index]
+            btn = tk.Button(game_window, text=choice, font=("Arial", 16), width=10, bg="#d1f3fc",
+                            command=lambda c=choice: check_answer(c, q["answer"]))
+            btn_id = canvas.create_window(x, y, window=btn)
+            option_button_ids.append(btn_id)
+
+    def update_stopwatch():
+        if game_over[0]:
+            return
+        elapsed = time.time() - start_time
+        canvas.itemconfig(stopwatch_id, text=f"Time: {elapsed:.1f}s")
+        game_window.after(100, update_stopwatch)
+
+    quit_btn = tk.Button(game_window, bg="#d1f3fc", text="Quit", font=("Georgia", 12),
+                        command=lambda: (game_window.destroy(), root.deiconify()))
+    canvas.create_window(820, 30, window=quit_btn)
+
+    show_question()
+    update_stopwatch()
+
+
 canvas = tk.Canvas(root, width=400, height=500, highlightthickness=0)
 canvas.place(x=0, y=0)
 
-# Set background image
 bg_image = Image.open("bg_clams.png").resize((400, 650))
 bg_photo = ImageTk.PhotoImage(bg_image)
 canvas.create_image(0, 0, image=bg_photo, anchor="nw")
 
-#Create all the labels for main menu
 canvas.create_text(200, 80, text="OH! CLAM", font=("Georgia", 40, "bold"), fill="#3f6f7d")
-canvas.create_text(200, 160, text ="Username", font=("Segoe Print", 15, "bold"), fill="#24424c")
-canvas.create_text(200, 240, text = "Difficulty", font=("Segoe Print", 15, "bold"), fill="#24424c")
-#Field for username entry
+canvas.create_text(200, 160, text="Username", font=("Segoe Print", 15, "bold"), fill="#24424c")
+canvas.create_text(200, 240, text="Difficulty", font=("Segoe Print", 15, "bold"), fill="#24424c")
+
 entry = tk.Entry(root, width=15, font=("", 14))
 entry.place(x=120, y=180)
-#Buttons for the main menu  
-button = tk.Button(root, bg= "#d1f3fc", text="Easy", width=8, height=1, font=("Georgia", 14), command=open_easy_level)
-button.place(x=150, y=260)
-button = tk.Button(root, bg= "#d1f3fc", text="Medium", width=8, height=1, font=("Georgia", 14), command=open_medium_level)
-button.place(x=150, y=300)
-button = tk.Button(root, bg= "#d1f3fc", text="Hard", width=8, height=1, font=("Georgia", 14), command=open_hard_level)
-button.place(x=150, y=340)
-button=tk.Button(root, bg="#d1f3fc", text="Info", width=8, height=1, font=("Georgia", 14), command=open_info)
-button.place(x=20, y=440)
-button=tk.Button(root, bg="#d1f3fc", text="Quit", width=8, height=1, font=("Georgia", 14), command=quit_app)
-button.place(x=280, y=440)
-button=tk.Button(root, bg="#d1f3fc", text="Scoreboard", width=8, height=1, font=("Georgia", 14), command=open_scoreboard)
-button.place(x=150, y=440)
+
+tk.Button(root, bg="#d1f3fc", text="Easy", width=8, font=("Georgia", 14), command=lambda: open_game_level("Easy", easy_questions)).place(x=150, y=260)
+tk.Button(root, bg="#d1f3fc", text="Medium", width=8, font=("Georgia", 14), command=lambda: open_game_level("Medium", medium_questions)).place(x=150, y=300)
+tk.Button(root, bg="#d1f3fc", text="Hard", width=8, font=("Georgia", 14), command=lambda: open_game_level("Hard", hard_questions)).place(x=150, y=340)
+tk.Button(root, bg="#d1f3fc", text="Info", width=8, font=("Georgia", 14), command=open_info).place(x=20, y=440)
+tk.Button(root, bg="#d1f3fc", text="Quit", width=8, font=("Georgia", 14), command=quit_app).place(x=280, y=440)
+tk.Button(root, bg="#d1f3fc", text="Scoreboard", width=8, font=("Georgia", 14), command=open_scoreboard).place(x=150, y=440)
 
 root.mainloop()
-
-
