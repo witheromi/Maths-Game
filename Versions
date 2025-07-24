@@ -1,4 +1,6 @@
 # OH! Clam Maths Game
+# Version 1.2
+# Updated: 22/07/25
 # Author: Naomi Ching
 
 import tkinter as tk
@@ -154,19 +156,19 @@ def open_game_level(level_name, question_templates, difficulty):
     canvas = tk.Canvas(game_window, width=900, height=600)
     canvas.pack(fill="both", expand=True)
 
-    bg_image = Image.open("painting_bg.png").resize((900, 600))
+    bg_image = Image.open("Background_2.png").resize((900, 600))
     bg_photo = ImageTk.PhotoImage(bg_image)
     canvas.create_image(0, 0, image=bg_photo, anchor="nw")
     game_window.bg_photo = bg_photo
 
-    game_window.otter_swim_img = ImageTk.PhotoImage(Image.open("otter_swimming.png").resize((120, 120)))
-    game_window.clam_img = ImageTk.PhotoImage(Image.open("clam.png").resize((120, 120)))
+    game_window.otter_swim_img = ImageTk.PhotoImage(Image.open("otter_swimming.png").resize((150, 150)))
+    game_window.clam_img = ImageTk.PhotoImage(Image.open("clam.png").resize((150, 150)))
     game_window.otter_clam_img = ImageTk.PhotoImage(Image.open("otter_holding_clam.png").resize((200, 250)))
 
     otter_x = 50
     otter_y = 450
     otter_id = canvas.create_image(otter_x, otter_y, image=game_window.otter_swim_img, anchor="nw")
-    clam_id = canvas.create_image(800, otter_y, image=game_window.clam_img, anchor="nw")
+    clam_id = canvas.create_image(760, otter_y, image=game_window.clam_img, anchor="nw")
 
     def move_otter():
         nonlocal otter_x, otter_y
@@ -174,12 +176,12 @@ def open_game_level(level_name, question_templates, difficulty):
         canvas.coords(otter_id, otter_x, otter_y)   
 
     start_time = time.time()
-    stopwatch_id = canvas.create_text(450, 30, text="Time: 0.0s", font=("Arial", 18), fill="black")
+    stopwatch_id = canvas.create_text(450, 30, text="Time: 0.0s", font=("Berlin Sans FB", 18), fill="black")
 
     game_over = [False]
     correct_count = [0]
 
-    feedback_id = canvas.create_text(450, 550, text="", font=("Arial", 18), fill="green")
+    feedback_id = canvas.create_text(450, 550, text="", font=("Arial", 18), fill="")
     answer_buttons_frame = tk.Frame(game_window, bg="white")
     buttons_window = canvas.create_window(450, 350, window=answer_buttons_frame)
     question_window_id = [None]
@@ -211,10 +213,10 @@ def open_game_level(level_name, question_templates, difficulty):
             return
         if selected == correct:
             correct_count[0] += 1
-            canvas.itemconfig(feedback_id, text="Correct!", fill="green")
+            canvas.itemconfig(feedback_id, text="Correct!", fill="#d1f3fc")
             move_otter()
         else:
-            canvas.itemconfig(feedback_id, text=f"Wrong! Answer was {correct}", fill="red")
+            canvas.itemconfig(feedback_id, text=f"Wrong! Answer was {correct}", fill="#144e63")
 
         if correct_count[0] >= 10:
             game_over[0] = True
@@ -232,7 +234,7 @@ def open_game_level(level_name, question_templates, difficulty):
 
 # Remove old stopwatch and feedback
             canvas.delete(stopwatch_id)
-            canvas.itemconfig(feedback_id, text="You reached the clam! 🦦🐚", fill="darkgreen")
+            canvas.itemconfig(feedback_id, text="You reached the clam! 🦦🐚", fill="#144e63")
 
             # Show large "Final Time" text above otter
             final_time_text = canvas.create_text(
@@ -259,14 +261,14 @@ def open_game_level(level_name, question_templates, difficulty):
         for widget in answer_buttons_frame.winfo_children():
             widget.destroy()
 
-        questions = generate_question()
-        question_window_id[0] = canvas.create_text(450, 150, text=questions["question"], font=("Arial", 24), fill="black")
+        q = generate_question()
+        question_window_id[0] = canvas.create_text(450, 150, text=q["question"], font=("Berlin Sans FB", 45), fill="#144e63")
 
         positions = [(350, 300), (500, 300), (350, 360), (500, 360)]
-        for index, choice in enumerate(questions["options"]):
+        for index, choice in enumerate(q["options"]):
             x, y = positions[index]
             btn = tk.Button(game_window, text=choice, font=("Arial", 16), width=10, bg="#d1f3fc",
-            command=lambda c=choice: check_answer(c, questions["answer"]))
+                            command=lambda c=choice: check_answer(c, q["answer"]))
             btn_id = canvas.create_window(x, y, window=btn)
             option_button_ids.append(btn_id)
 
