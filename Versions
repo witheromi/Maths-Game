@@ -1,6 +1,4 @@
 # OH! Clam Maths Game
-# Version 1.2
-# Updated: 22/07/25
 # Author: Naomi Ching
 
 import tkinter as tk
@@ -11,7 +9,7 @@ import time
 import os
 
 
-
+#This is so windows don't appear in it's default place but at certain parts of the screen to look better
 def center_window(win, width, height):
     screen_width = root.winfo_screenwidth()
     screen_height =root.winfo_screenheight()
@@ -25,26 +23,28 @@ root.title("OH Clam!")
 center_window(root, 400, 500)
 root.resizable(False, False)
 
+
+
+#Function to quit the game
 def quit_app():
     if messagebox.askokcancel("Quit", "Do you really want to quit?"):
         root.destroy()
 
+#Function to open the info 
 def open_info():
     info_window = tk.Toplevel(root)
     info_window.title("About the Game")
     info_window.geometry("500x110+240+290")  
     info_window.resizable(False, False)
 
-    # Create canvas sized to the window
+
     canvas = tk.Canvas(info_window, width=500, height=130)
     canvas.pack(fill="both", expand=True)
 
-    # Load and display the background image
+#Displays the main menu's background image with resizing it 
     bg_image = Image.open("bg_clams.png").resize((550, 500))
     bg_photo = ImageTk.PhotoImage(bg_image)
     canvas.create_image(0, 0, image=bg_photo, anchor="nw")
-
-    # Save reference to avoid garbage collection
     info_window.bg_photo = bg_photo
 
     # Your message text, displayed on canvas
@@ -66,9 +66,9 @@ def open_info():
     quit_button = tk.Button(info_window, bg="#d1f3fc", text="Close", font=("Georgia", 9), command=info_window.destroy)
     quit_button.place(x=430, y=80)
 
-def save_score(username, elapsed_time):
+def save_score(username, elapsed_time, difficulty):
     with open("scoreboard.txt", "a") as file:
-        file.write(f"{username},{elapsed_time:.1f}\n")
+        file.write(f"{username},{elapsed_time:.1f},{difficulty}\n")
 
 def open_scoreboard():
     scoreboard_window = tk.Toplevel(root)
@@ -80,15 +80,16 @@ def open_scoreboard():
     canvas.pack(fill="both", expand=True)
 
     try:
-        bg_image = Image.open("bg_clams.png").resize((500, 300))
+        bg_image = Image.open("bg_clams.png").resize((500, 400))
         bg_photo = ImageTk.PhotoImage(bg_image)
         canvas.create_image(0, 0, image=bg_photo, anchor="nw")
         scoreboard_window.bg_photo = bg_photo
     except:
         pass
 
-    canvas.create_text(130, 30, text="Username", font=("Segoe Print", 17, "bold"), fill="#24424c")
-    canvas.create_text(350, 30, text="Time (s)", font=("Segoe Print", 17, "bold"), fill="#24424c")
+    canvas.create_text(100, 30, text="Username", font=("Segoe Print", 17, "bold"), fill="#24424c")
+    canvas.create_text(250, 30, text="Time (s)", font=("Segoe Print", 17, "bold"), fill="#24424c")
+    canvas.create_text(400, 30, text="Difficulty", font=("Segoe Print", 17, "bold"), fill="#24424c")
 
     if os.path.exists("scoreboard.txt"):
         with open("scoreboard.txt", "r") as file:
@@ -96,45 +97,49 @@ def open_scoreboard():
             scores = []
             for line in lines:
                 try:
-                    name, t = line.strip().split(",")
-                    scores.append((name, float(t)))
+                    name, t, diff = line.strip().split(",")
+                    scores.append((name, float(t), diff))
                 except:
                     continue
             scores.sort(key=lambda x: x[1])
-            for i, (name, t) in enumerate(scores[:10]):
-                canvas.create_text(130, 60 + i * 20, text=name, font=("Arial", 12), fill="#24424c")
-                canvas.create_text(350, 60 + i * 20, text=f"{t:.1f}s", font=("Arial", 12), fill="#24424c")
+            
+            for i, (name, t, diff) in enumerate(scores[:10]):
+                canvas.create_text(100, 60 + i * 20, text=name, font=("Arial", 12), fill="#24424c")
+                canvas.create_text(250, 60 + i * 20, text=f"{t:.1f}s", font=("Arial", 12), fill="#24424c")
+                canvas.create_text(400, 60 + i * 20, text=diff, font=("Arial", 12), fill="#24424c")
+
 
     quit_button = tk.Button(scoreboard_window, bg="#d1f3fc", text="Close", font=("Georgia", 12), command=scoreboard_window.destroy)
     quit_button.place(x=400, y=260)
 
 easy_questions = [
     ("What is 2x + 3 when x = {x}?", lambda x: 2 * x + 3),
-    ("What is x² - 4 when x = {x}?", lambda x: x ** 2 - 4),
+    ("What is x - 4 when x = {x}?", lambda x: x - 4),
     ("What is 3x - 7 when x = {x}?", lambda x: 3 * x - 7),
-    ("What is x³ + 2 when x = {x}?", lambda x: x ** 3 + 2),
-    ("What is 4x² - x when x = {x}?", lambda x: 4 * x ** 2 - x),
+    ("What is x + 2 when x = {x}?", lambda x: x  + 2),
+    ("What is 4x - x when x = {x}?", lambda x: 4 * x - x),
 ]
 
 medium_questions = [
     ("What is 5x + 2 when x = {x}?", lambda x: 5 * x + 2),
-    ("What is x² + x when x = {x}?", lambda x: x ** 2 + x),
-    ("What is (x + 3) * 2 when x = {x}?", lambda x: (x + 3) * 2),
-    ("What is (3x - 1) when x = {x}?", lambda x: 3 * x - 1),
-    ("What is (x² - 1) when x = {x}?", lambda x: x ** 2 - 1),
+    ("What is 3x² + x when x = {x}?", lambda x: x ** 2 + x),
+    ("What is (6x + 12 when x = {x}?", lambda x: 6 * x + 12),
+    ("What is (3x + 9) when x = {x}?", lambda x: 3 * x + 9),
+    ("What is (4x² - 1) when x = {x}?", lambda x: 4*x ** 2 - 1),
 ]
 
 
 hard_questions = [
-    ("What is (x³ + 2x² - x + 4) when x = {x}?", lambda x: x**3 + 2*x**2 - x + 4),
-    ("What is ((3x² + 2x - 5) / (x + 1)) when x = {x}?", lambda x: (3*x**2 + 2*x - 5)/(x + 1) if x != -1 else float('inf')),
-    ("What is (2x³ - x² + 3x - 7) when x = {x}?", lambda x: 2*x**3 - x**2 + 3*x - 7),
-    ("What is ((x - 2)(x² + 2x + 4)) when x = {x}?", lambda x: (x - 2)*(x**2 + 2*x + 4)),
-    ("What is ((x + 1)³ - x³) when x = {x}?", lambda x: (x + 1)**3 - x**3),
+    ("What is x³ + 2x when x = {x}?", lambda x: x**3 + 2*x),
+    ("What is 3x² - x + 1 when x = {x}?", lambda x: 3*x**2 - x + 1),
+    ("What is 2x² + 5x when x = {x}?", lambda x: 2*x**2 + 5*x),
+    ("What is x² - 4x + 4 when x = {x}?", lambda x: x**2 - 4*x + 4),
+    ("What is (x + 2)(x - 3) when x = {x}?", lambda x: (x + 2)*(x - 3)),
 ]
 
 
-def open_game_level(level_name, question_templates):
+
+def open_game_level(level_name, question_templates, difficulty):
     username = entry.get().strip()
     if not username:
         messagebox.showerror("No Username", "Please enter a username to start.")
@@ -237,7 +242,7 @@ def open_game_level(level_name, question_templates):
                 fill="black"
             )
 
-            save_score(username, elapsed)
+            save_score(username, elapsed, difficulty)
 
         else:
             game_window.after(1000, show_question)
@@ -254,14 +259,14 @@ def open_game_level(level_name, question_templates):
         for widget in answer_buttons_frame.winfo_children():
             widget.destroy()
 
-        q = generate_question()
-        question_window_id[0] = canvas.create_text(450, 150, text=q["question"], font=("Arial", 24), fill="black")
+        questions = generate_question()
+        question_window_id[0] = canvas.create_text(450, 150, text=questions["question"], font=("Arial", 24), fill="black")
 
         positions = [(350, 300), (500, 300), (350, 360), (500, 360)]
-        for index, choice in enumerate(q["options"]):
+        for index, choice in enumerate(questions["options"]):
             x, y = positions[index]
             btn = tk.Button(game_window, text=choice, font=("Arial", 16), width=10, bg="#d1f3fc",
-                            command=lambda c=choice: check_answer(c, q["answer"]))
+            command=lambda c=choice: check_answer(c, questions["answer"]))
             btn_id = canvas.create_window(x, y, window=btn)
             option_button_ids.append(btn_id)
 
@@ -279,6 +284,12 @@ def open_game_level(level_name, question_templates):
     show_question()
     update_stopwatch()
 
+def validate_alpha_input(input_text):
+    # Allow alphabetic characters and spaces
+    if (all(char.isalpha() or char.isspace() for char in input_text) or input_text == "") and len(input_text)<=20:
+        return True
+    return False
+validate_number = root.register(validate_alpha_input)
 
 canvas = tk.Canvas(root, width=400, height=500, highlightthickness=0)
 canvas.place(x=0, y=0)
@@ -291,12 +302,13 @@ canvas.create_text(200, 80, text="OH! CLAM", font=("Georgia", 40, "bold"), fill=
 canvas.create_text(200, 160, text="Username", font=("Segoe Print", 15, "bold"), fill="#24424c")
 canvas.create_text(200, 240, text="Difficulty", font=("Segoe Print", 15, "bold"), fill="#24424c")
 
-entry = tk.Entry(root, width=15, font=("", 14))
+entry = tk.Entry(root, width=15, font=("Georgia", 12), validate="key", validatecommand=(validate_number, "%P" ))
 entry.place(x=120, y=180)
 
-tk.Button(root, bg="#d1f3fc", text="Easy", width=8, font=("Georgia", 14), command=lambda: open_game_level("Easy", easy_questions)).place(x=150, y=260)
-tk.Button(root, bg="#d1f3fc", text="Medium", width=8, font=("Georgia", 14), command=lambda: open_game_level("Medium", medium_questions)).place(x=150, y=300)
-tk.Button(root, bg="#d1f3fc", text="Hard", width=8, font=("Georgia", 14), command=lambda: open_game_level("Hard", hard_questions)).place(x=150, y=340)
+tk.Button(root, bg="#d1f3fc", text="Easy", width=8, font=("Georgia", 14), command=lambda: open_game_level("Easy", easy_questions, "Easy")).place(x=150, y=260)
+tk.Button(root, bg="#d1f3fc", text="Medium", width=8, font=("Georgia", 14), command=lambda: open_game_level("Medium", medium_questions, "Medium")).place(x=150, y=300)
+tk.Button(root, bg="#d1f3fc", text="Hard", width=8, font=("Georgia", 14), command=lambda: open_game_level("Hard", hard_questions, "Hard")).place(x=150, y=340)
+
 tk.Button(root, bg="#d1f3fc", text="Info", width=8, font=("Georgia", 14), command=open_info).place(x=20, y=440)
 tk.Button(root, bg="#d1f3fc", text="Quit", width=8, font=("Georgia", 14), command=quit_app).place(x=280, y=440)
 tk.Button(root, bg="#d1f3fc", text="Scoreboard", width=8, font=("Georgia", 14), command=open_scoreboard).place(x=150, y=440)
